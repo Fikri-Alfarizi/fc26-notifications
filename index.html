@@ -628,6 +628,8 @@
         <div class="status-bar">
             <div class="status-dot offline" id="statusDot"></div>
             <span id="statusText">Not connected</span>
+            <button class="btn btn-outline" style="padding:5px 10px;font-size:11px;margin-left:6px"
+                onclick="resetToken()">🔑 Token</button>
         </div>
     </header>
 
@@ -718,6 +720,14 @@
 
         // ─── Token ───
         function getToken() { return localStorage.getItem('fc26_gh_token') || ''; }
+
+        function resetToken() {
+            localStorage.removeItem('fc26_gh_token');
+            document.getElementById('setupBanner').style.display = 'block';
+            document.getElementById('tokenInput').value = '';
+            updateUI();
+            showToast('Token removed — paste a new one');
+        }
 
         function saveToken() {
             const t = document.getElementById('tokenInput').value.trim();
