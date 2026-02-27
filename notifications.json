@@ -2,38 +2,6 @@
   "version": "1.0",
   "notifications": [
     {
-      "id": "001",
-      "title": "Ã°ÂÂÂ Welcome to FC26 Launcher!",
-      "message": "Terima kasih sudah install FC26 Launcher. Enjoy!",
-      "type": "info",
-      "date": "2026-02-27",
-      "priority": "high"
-    },
-    {
-      "id": "1772162532949",
-      "title": "tes",
-      "message": "tes",
-      "type": "info",
-      "priority": "normal",
-      "date": "2026-02-27"
-    },
-    {
-      "id": "1772162744815",
-      "title": "tes",
-      "message": "tes",
-      "type": "info",
-      "priority": "normal",
-      "date": "2026-02-27"
-    },
-    {
-      "id": "1772162855365",
-      "title": "halo",
-      "message": "ess",
-      "type": "info",
-      "priority": "normal",
-      "date": "2026-02-27"
-    },
-    {
       "id": "1772163118381",
       "title": "tetttttttttt",
       "message": "fffffff",
