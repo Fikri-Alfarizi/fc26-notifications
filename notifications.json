@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "notifications": [
+    {
+      "id": "001",
+      "title": "🎉 Welcome to FC26 Launcher!",
+      "message": "Terima kasih sudah install FC26 Launcher. Enjoy!",
+      "type": "info",
+      "date": "2026-02-27",
+      "priority": "high"
+    }
+  ]
+}
