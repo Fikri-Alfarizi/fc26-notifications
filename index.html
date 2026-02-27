@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FC26 Notification Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0A0A0A;
+            --surface: #111111;
+            --surface2: #1A1A1A;
+            --border: #222222;
+            --accent: #31F185;
+            --accent-hover: #28D477;
+            --accent-glow: rgba(49, 241, 133, 0.15);
+            --text: #FFFFFF;
+            --text-sec: #888888;
+            --text-muted: #555555;
+            --danger: #FF4444;
+            --warning: #FFB900;
+            --info: #31F185;
+            --update: #00B4FF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── Header ── */
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo {
+            width: 34px;
+            height: 34px;
+            background: var(--accent);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 800;
+            color: #000;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .header h1 span {
+            color: var(--accent);
+        }
+
+        .badge {
+            background: var(--accent);
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-sec);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.offline {
+            background: var(--danger);
+            animation: none;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        /* ── Setup Banner ── */
+        .setup-banner {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+
+        .setup-banner h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--warning);
+        }
+
+        .setup-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .setup-row input {
+            flex: 1;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: 'Inter', monospace;
+            font-size: 13px;
+        }
+
+        .setup-row input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .setup-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .setup-hint a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .setup-hint a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Container ── */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 28px;
+        }
+
+        /* ── Toolbar ── */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 9px 18px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-publish {
+            background: linear-gradient(135deg, var(--accent), #00B4FF);
+            color: #000;
+            font-weight: 700;
+            padding: 9px 22px;
+            box-shadow: 0 4px 20px rgba(49, 241, 133, 0.3);
+        }
+
+        .btn-publish:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(49, 241, 133, 0.4);
+        }
+
+        .btn-publish:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-sec);
+            border: 1px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid transparent;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .btn-sm {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .count-badge {
+            background: var(--surface2);
+            color: var(--text-sec);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+        }
+
+        /* ── Cards ── */
+        .notif-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notif-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .notif-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+        }
+
+        .notif-card.type-info::before {
+            background: var(--info);
+        }
+
+        .notif-card.type-warning::before {
+            background: var(--warning);
+        }
+
+        .notif-card.type-update::before {
+            background: var(--update);
+        }
+
+        .notif-card.type-error::before {
+            background: var(--danger);
+        }
+
+        .notif-card:hover {
+            border-color: #333;
+            transform: translateX(3px);
+        }
+
+        .notif-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .notif-title {
+            font-size: 14px;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .notif-meta {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .notif-type {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .type-info .notif-type {
+            background: rgba(49, 241, 133, 0.15);
+            color: var(--info);
+        }
+
+        .type-warning .notif-type {
+            background: rgba(255, 185, 0, 0.15);
+            color: var(--warning);
+        }
+
+        .type-update .notif-type {
+            background: rgba(0, 180, 255, 0.15);
+            color: var(--update);
+        }
+
+        .type-error .notif-type {
+            background: rgba(255, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .notif-priority {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255, 185, 0, 0.15);
+            color: var(--warning);
+        }
+
+        .notif-message {
+            color: var(--text-sec);
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .notif-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notif-date {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .notif-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* ── Empty ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            color: var(--text-sec);
+            margin-bottom: 6px;
+        }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            width: 500px;
+            max-width: 92vw;
+            overflow: hidden;
+            animation: modalIn 0.25s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.96) translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0)
+            }
+        }
+
+        .modal-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .modal-close:hover {
+            background: var(--surface2);
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 22px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-sec);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 12px;
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 70px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--surface);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: var(--text);
+            font-size: 13px;
+            z-index: 2000;
+            max-width: 360px;
+            animation: slideIn 0.3s ease, fadeOut 0.3s ease 3s forwards;
+            box-shadow: 0 4px 20px rgba(49, 241, 133, 0.2);
+        }
+
+        .toast.error {
+            border-color: var(--danger);
+            box-shadow: 0 4px 20px rgba(255, 68, 68, 0.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(120%);
+                opacity: 0
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .header {
+                padding: 12px 16px;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-left {
+                flex-wrap: wrap;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">⚡</div>
+            <h1><span>FC26</span> DASHBOARD</h1>
+            <span class="badge">ADMIN</span>
+        </div>
+        <div class="status-bar">
+            <div class="status-dot offline" id="statusDot"></div>
+            <span id="statusText">Not connected</span>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Token Setup -->
+        <div class="setup-banner" id="setupBanner">
+            <h3>⚠️ Setup GitHub Token</h3>
+            <div class="setup-row">
+                <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+                <button class="btn btn-primary" onclick="saveToken()">Connect</button>
+            </div>
+            <p class="setup-hint">
+                Buat token di <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a>
+                (centang scope <strong>repo</strong>). Token disimpan di browser saja (localStorage).
+            </p>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn btn-primary" onclick="openModal()">＋ New</button>
+                <button class="btn btn-outline" onclick="loadFromGitHub()">↻ Refresh</button>
+                <span class="count-badge" id="countBadge">0</span>
+            </div>
+            <button class="btn btn-publish" id="publishBtn" onclick="publishToGitHub()">🚀 PUBLISH</button>
+        </div>
+
+        <!-- List -->
+        <div class="notif-list" id="notifList">
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📭</div>
+                <h3>No Notifications</h3>
+                <p>Click "New" to create one</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="event.target===this&&closeModal()">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">New Notification</h2>
+                <button class="modal-close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="inputTitle" placeholder="🎉 Update v2.0 Available!">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="inputMessage" placeholder="Deskripsi notifikasi..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select id="inputType">
+                            <option value="info">ℹ️ Info</option>
+                            <option value="update">🚀 Update</option>
+                            <option value="warning">⚠️ Warning</option>
+                            <option value="error">❌ Error</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="inputPriority">
+                            <option value="normal">Normal</option>
+                            <option value="high">🔥 High</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveNotification()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REPO = 'Fikri-Alfarizi/fc26-notifications';
+        const FILE = 'notifications.json';
+        const BRANCH = 'main';
+
+        let notifications = [];
+        let fileSHA = '';
+
+        // ─── Token ───
+        function getToken() { return localStorage.getItem('fc26_gh_token') || ''; }
+
+        function saveToken() {
+            const t = document.getElementById('tokenInput').value.trim();
+            if (!t) return;
+            localStorage.setItem('fc26_gh_token', t);
+            showToast('✅ Token saved!');
+            updateUI();
+            loadFromGitHub();
+        }
+
+        function updateUI() {
+            const hasToken = !!getToken();
+            document.getElementById('setupBanner').style.display = hasToken ? 'none' : 'block';
+            const dot = document.getElementById('statusDot');
+            const txt = document.getElementById('statusText');
+            if (hasToken) {
+                dot.classList.remove('offline');
+                txt.textContent = 'Connected';
+            } else {
+                dot.classList.add('offline');
+                txt.textContent = 'Token not set';
+            }
+        }
+
+        // ─── GitHub API ───
+        async function ghFetch(url, opts = {}) {
+            const token = getToken();
+            if (!token) throw new Error('Token not set');
+            const res = await fetch(url, {
+                ...opts,
+                headers: {
+                    'Authorization': 'Bearer ' + token,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json',
+                    ...(opts.headers || {})
+                }
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.message || `HTTP ${res.status}`);
+            }
+            return res.json();
+        }
+
+        async function loadFromGitHub() {
+            if (!getToken()) return;
+            try {
+                const data = await ghFetch(
+                    `https://api.github.com/repos/${REPO}/contents/${FILE}?ref=${BRANCH}`
+                );
+                fileSHA = data.sha;
+                const decoded = atob(data.content);
+                const payload = JSON.parse(decoded);
+                notifications = payload.notifications || [];
+                renderList();
+                document.getElementById('statusText').textContent =
+                    `Synced · ${notifications.length} notif`;
+                showToast(`Loaded ${notifications.length} notification(s)`);
+            } catch (e) {
+                if (e.message.includes('404') || e.message.includes('Not Found')) {
+                    notifications = [];
+                    fileSHA = '';
+                    renderList();
+                    showToast('File not found — will be created on publish');
+                } else {
+                    showToast('❌ ' + e.message, true);
+                }
+            }
+        }
+
+        async function publishToGitHub() {
+            if (!getToken()) { showToast('Set token first!', true); return; }
+            const btn = document.getElementById('publishBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Publishing...';
+
+            try {
+                const payload = JSON.stringify({
+                    version: '1.0',
+                    notifications: notifications
+                }, null, 2);
+
+                const body = {
+                    message: `📢 Update notifications — ${new Date().toISOString().slice(0, 16)}`,
+                    content: btoa(unescape(encodeURIComponent(payload))),
+                    branch: BRANCH
+                };
+                if (fileSHA) body.sha = fileSHA;
+
+                const res = await ghFetch(
+                    `https://api.github.com/repos/${REPO}/contents/${FILE}`,
+                    { method: 'PUT', body: JSON.stringify(body) }
+                );
+                fileSHA = res.content.sha;
+                document.getElementById('statusText').textContent =
+                    `Published · ${new Date().toLocaleTimeString()}`;
+                showToast('✅ Published to GitHub!');
+            } catch (e) {
+                showToast('❌ ' + e.message, true);
+            }
+
+            btn.disabled = false;
+            btn.textContent = '🚀 PUBLISH';
+        }
+
+        // ─── CRUD ───
+        function openModal(editMode) {
+            document.getElementById('modalOverlay').classList.add('active');
+            if (!editMode) {
+                document.getElementById('modalTitle').textContent = 'New Notification';
+                document.getElementById('editId').value = '';
+                document.getElementById('inputTitle').value = '';
+                document.getElementById('inputMessage').value = '';
+                document.getElementById('inputType').value = 'info';
+                document.getElementById('inputPriority').value = 'normal';
+            }
+            setTimeout(() => document.getElementById('inputTitle').focus(), 100);
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        function editNotif(id) {
+            const n = notifications.find(x => x.id === id);
+            if (!n) return;
+            document.getElementById('editId').value = n.id;
+            document.getElementById('inputTitle').value = n.title;
+            document.getElementById('inputMessage').value = n.message;
+            document.getElementById('inputType').value = n.type;
+            document.getElementById('inputPriority').value = n.priority;
+            document.getElementById('modalTitle').textContent = 'Edit Notification';
+            openModal(true);
+        }
+
+        function saveNotification() {
+            const id = document.getElementById('editId').value;
+            const title = document.getElementById('inputTitle').value.trim();
+            const message = document.getElementById('inputMessage').value.trim();
+            const type = document.getElementById('inputType').value;
+            const priority = document.getElementById('inputPriority').value;
+
+            if (!title || !message) { showToast('Title & message required!', true); return; }
+
+            if (id) {
+                const idx = notifications.findIndex(n => n.id === id);
+                if (idx >= 0) notifications[idx] = { id, title, message, type, priority, date: notifications[idx].date };
+                showToast('✏️ Updated!');
+            } else {
+                notifications.push({
+                    id: Date.now().toString(),
+                    title, message, type, priority,
+                    date: new Date().toISOString().slice(0, 10)
+                });
+                showToast('✅ Created!');
+            }
+
+            closeModal();
+            renderList();
+        }
+
+        function deleteNotif(id) {
+            if (!confirm('Delete this notification?')) return;
+            notifications = notifications.filter(n => n.id !== id);
+            renderList();
+            showToast('🗑️ Deleted');
+        }
+
+        // ─── Render ───
+        function renderList() {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('countBadge');
+            badge.textContent = notifications.length + ' notification' + (notifications.length !== 1 ? 's' : '');
+
+            if (notifications.length === 0) {
+                list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>No Notifications</h3>
+        <p>Click "New" to create one</p>
+      </div>`;
+                return;
+            }
+
+            list.innerHTML = notifications.map(n => `
+    <div class="notif-card type-${esc(n.type)}">
+      <div class="notif-header">
+        <div class="notif-title">${esc(n.title)}</div>
+        <div class="notif-meta">
+          <span class="notif-type">${esc(n.type)}</span>
+          ${n.priority === 'high' ? '<span class="notif-priority">HIGH</span>' : ''}
+        </div>
+      </div>
+      <div class="notif-message">${esc(n.message)}</div>
+      <div class="notif-footer">
+        <span class="notif-date">📅 ${esc(n.date)} · ID: ${esc(n.id)}</span>
+        <div class="notif-actions">
+          <button class="btn btn-outline btn-sm" onclick="editNotif('${esc(n.id)}')">✏️</button>
+          <button class="btn btn-danger" onclick="deleteNotif('${esc(n.id)}')">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+        }
+
+        function esc(s) {
+            if (!s) return '';
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        // ─── Toast ───
+        function showToast(msg, isError) {
+            document.querySelectorAll('.toast').forEach(t => t.remove());
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.textContent = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
+        }
+
+        // ─── Keyboard ───
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+            if (e.ctrlKey && e.key === 'n') { e.preventDefault(); openModal(); }
+        });
+
+        // ─── Init ───
+        updateUI();
+        if (getToken()) loadFromGitHub();
+    </script>
+</body>
+
+</html>
