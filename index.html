@@ -270,6 +270,56 @@
             font-size: 12px;
         }
 
+        .btn-send {
+            background: var(--accent);
+            color: #000;
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .btn-send:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-unsend {
+            background: rgba(255, 185, 0, 0.15);
+            color: var(--warning);
+            padding: 5px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid transparent;
+        }
+
+        .btn-unsend:hover {
+            background: rgba(255, 185, 0, 0.25);
+        }
+
+        .notif-card.inactive {
+            opacity: 0.5;
+        }
+
+        .notif-card.inactive:hover {
+            opacity: 0.75;
+        }
+
+        .status-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .status-badge.live {
+            background: rgba(49, 241, 133, 0.15);
+            color: var(--info);
+        }
+
+        .status-badge.draft {
+            background: rgba(136, 136, 136, 0.15);
+            color: var(--text-muted);
+        }
+
         .count-badge {
             background: var(--surface2);
             color: var(--text-sec);
@@ -897,15 +947,19 @@
 
             if (id) {
                 const idx = notifications.findIndex(n => n.id === id);
-                if (idx >= 0) notifications[idx] = { id, title, message, type, priority, date: notifications[idx].date };
+                if (idx >= 0) {
+                    const existing = notifications[idx];
+                    notifications[idx] = { id, title, message, type, priority, date: existing.date, active: existing.active || false };
+                }
                 showToast('✏️ Updated!');
             } else {
                 notifications.push({
                     id: Date.now().toString(),
                     title, message, type, priority,
-                    date: new Date().toISOString().slice(0, 10)
+                    date: new Date().toISOString().slice(0, 10),
+                    active: false  // New notifications are drafts by default
                 });
-                showToast('✅ Created!');
+                showToast('✅ Created as draft — click SEND to activate');
             }
 
             closeModal();
@@ -919,41 +973,52 @@
             showToast('🗑️ Deleted');
         }
 
+        function toggleActive(id) {
+            const n = notifications.find(x => x.id === id);
+            if (!n) return;
+            n.active = !n.active;
+            renderList();
+            showToast(n.active ? '📤 Notification activated — will be sent to launchers' : '📥 Notification deactivated — will NOT be sent');
+        }
+
         // ─── Render ───
         function renderList() {
             const list = document.getElementById('notifList');
             const badge = document.getElementById('countBadge');
-            badge.textContent = notifications.length + ' notification' + (notifications.length !== 1 ? 's' : '');
+            const activeCount = notifications.filter(n => n.active).length;
+            badge.textContent = `${activeCount} active / ${notifications.length} total`;
 
             if (notifications.length === 0) {
                 list.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📭</div>
-        <h3>No Notifications</h3>
-        <p>Click "New" to create one</p>
-      </div>`;
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No Notifications</h3>
+            <p>Click "New" to create one</p>
+        </div>`;
                 return;
             }
 
             list.innerHTML = notifications.map(n => `
-    <div class="notif-card type-${esc(n.type)}">
-      <div class="notif-header">
-        <div class="notif-title">${esc(n.title)}</div>
-        <div class="notif-meta">
-          <span class="notif-type">${esc(n.type)}</span>
-          ${n.priority === 'high' ? '<span class="notif-priority">HIGH</span>' : ''}
+        <div class="notif-card type-${esc(n.type)} ${n.active ? '' : 'inactive'}">
+        <div class="notif-header">
+            <div class="notif-title">${esc(n.title)}</div>
+            <div class="notif-meta">
+            <span class="status-badge ${n.active ? 'live' : 'draft'}">${n.active ? '🟢 LIVE' : '⚫ DRAFT'}</span>
+            <span class="notif-type">${esc(n.type)}</span>
+            ${n.priority === 'high' ? '<span class="notif-priority">HIGH</span>' : ''}
+            </div>
         </div>
-      </div>
-      <div class="notif-message">${esc(n.message)}</div>
-      <div class="notif-footer">
-        <span class="notif-date">📅 ${esc(n.date)} · ID: ${esc(n.id)}</span>
-        <div class="notif-actions">
-          <button class="btn btn-outline btn-sm" onclick="editNotif('${esc(n.id)}')">✏️</button>
-          <button class="btn btn-danger" onclick="deleteNotif('${esc(n.id)}')">🗑️</button>
+        <div class="notif-message">${esc(n.message)}</div>
+        <div class="notif-footer">
+            <span class="notif-date">📅 ${esc(n.date)} · ID: ${esc(n.id)}</span>
+            <div class="notif-actions">
+            <button class="btn ${n.active ? 'btn-unsend' : 'btn-send'}" onclick="toggleActive('${esc(n.id)}')">${n.active ? '📥 Unsend' : '📤 Send'}</button>
+            <button class="btn btn-outline btn-sm" onclick="editNotif('${esc(n.id)}')">✏️</button>
+            <button class="btn btn-danger" onclick="deleteNotif('${esc(n.id)}')">🗑️</button>
+            </div>
         </div>
-      </div>
-    </div>
-  `).join('');
+        </div>
+    `).join('');
         }
 
         function esc(s) {
