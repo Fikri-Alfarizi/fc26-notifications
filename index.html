@@ -776,10 +776,14 @@
             if (!getToken()) return;
             try {
                 const data = await ghFetch(
-                    `https://api.github.com/repos/${REPO}/contents/${FILE}?ref=${BRANCH}`
+                    `https://api.github.com/repos/${REPO}/contents/${FILE}?ref=${BRANCH}&t=${Date.now()}`
                 );
                 fileSHA = data.sha;
-                const decoded = atob(data.content);
+                // Properly decode UTF-8 base64 (handles emoji)
+                const raw = atob(data.content.replace(/\n/g, ''));
+                const bytes = new Uint8Array(raw.length);
+                for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+                const decoded = new TextDecoder('utf-8').decode(bytes);
                 const payload = JSON.parse(decoded);
                 notifications = payload.notifications || [];
                 renderList();
@@ -805,14 +809,30 @@
             btn.textContent = '⏳ Publishing...';
 
             try {
-                const payload = JSON.stringify({
+                // Re-fetch latest SHA to avoid conflict
+                try {
+                    const latest = await ghFetch(
+                        `https://api.github.com/repos/${REPO}/contents/${FILE}?ref=${BRANCH}&t=${Date.now()}`
+                    );
+                    fileSHA = latest.sha;
+                } catch (e) {
+                    fileSHA = ''; // File doesn't exist yet
+                }
+
+                // Encode payload as UTF-8 base64
+                const jsonStr = JSON.stringify({
                     version: '1.0',
                     notifications: notifications
                 }, null, 2);
+                const encoder = new TextEncoder();
+                const utf8Bytes = encoder.encode(jsonStr);
+                let binary = '';
+                for (let i = 0; i < utf8Bytes.length; i++) binary += String.fromCharCode(utf8Bytes[i]);
+                const b64content = btoa(binary);
 
                 const body = {
                     message: `📢 Update notifications — ${new Date().toISOString().slice(0, 16)}`,
-                    content: btoa(unescape(encodeURIComponent(payload))),
+                    content: b64content,
                     branch: BRANCH
                 };
                 if (fileSHA) body.sha = fileSHA;
@@ -825,6 +845,9 @@
                 document.getElementById('statusText').textContent =
                     `Published · ${new Date().toLocaleTimeString()}`;
                 showToast('✅ Published to GitHub!');
+
+                // Auto-verify: reload from GitHub after 1s
+                setTimeout(() => loadFromGitHub(), 1500);
             } catch (e) {
                 showToast('❌ ' + e.message, true);
             }
