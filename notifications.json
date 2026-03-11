@@ -7,7 +7,8 @@
       "message": "fffffff",
       "type": "info",
       "priority": "normal",
-      "date": "2026-02-27"
+      "date": "2026-02-27",
+      "active": true
     },
     {
       "id": "1772163357434",
@@ -15,7 +16,8 @@
       "message": "asdfasdfs",
       "type": "warning",
       "priority": "normal",
-      "date": "2026-02-27"
+      "date": "2026-02-27",
+      "active": true
     },
     {
       "id": "1772163508039",
