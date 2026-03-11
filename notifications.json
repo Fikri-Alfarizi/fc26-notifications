@@ -27,6 +27,15 @@
       "priority": "normal",
       "date": "2026-03-11",
       "active": true
+    },
+    {
+      "id": "1773204406955",
+      "title": "UPDATE 3.0",
+      "message": "This token expires on Fri, Apr 10 2026. To set a new expiration date, you must regenerate the token.",
+      "type": "info",
+      "priority": "normal",
+      "date": "2026-03-11",
+      "active": true
     }
   ]
 }
